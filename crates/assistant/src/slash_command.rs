@@ -1,3 +1,12 @@
+pub mod active_command;
+pub mod diagnostics_command;
+pub mod file_command;
+pub mod project_command;
+pub mod prompt_command;
+pub mod rustdoc_command;
+pub mod search_command;
+pub mod tabs_command;
+
 use crate::assistant_panel::ConversationEditor;
 use anyhow::Result;
 pub use assistant_slash_command::{SlashCommand, SlashCommandOutput, SlashCommandRegistry};
@@ -15,14 +24,6 @@ use std::{
     },
 };
 use workspace::Workspace;
-
-pub mod active_command;
-pub mod file_command;
-pub mod project_command;
-pub mod prompt_command;
-pub mod rustdoc_command;
-pub mod search_command;
-pub mod tabs_command;
 
 pub(crate) struct SlashCommandCompletionProvider {
     editor: WeakView<ConversationEditor>,
