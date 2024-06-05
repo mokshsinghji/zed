@@ -2889,7 +2889,7 @@ impl Editor {
                     }
                     // If an opening bracket is 1 character long and is typed while
                     // text is selected, then surround that text with the bracket pair.
-                    else if autoclose
+                    else if !self.is_marked_text_range(&selection, &snapshot, cx)
                         && is_bracket_pair_start
                         && bracket_pair.start.chars().count() == 1
                     {
@@ -11028,6 +11028,26 @@ impl Editor {
             })
         }));
         self
+    }
+
+    fn is_marked_text_range(
+        &self,
+        selection: &Selection<Point>,
+        snapshot: &MultiBufferSnapshot,
+        cx: &ViewContext<Self>,
+    ) -> bool {
+        let Some((_, ranges)) = self.text_highlights::<InputComposition>(cx) else {
+            return false;
+        };
+
+        for range in ranges {
+            if range.start.to_point(snapshot) == selection.start
+                && range.end.to_point(snapshot) == selection.end
+            {
+                return true;
+            }
+        }
+        false
     }
 }
 
