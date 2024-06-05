@@ -57,14 +57,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Set tag and release name
+        id: set_tag_release_name
+        run: |
+          BRANCH_NAME=${GITHUB_REF#refs/heads/}
+          TAG_NAME="${BRANCH_NAME}-$(date -u +"%Y%m%d%H%M%S")"
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+          echo "RELEASE_NAME=Release $TAG_NAME" >> $GITHUB_ENV
+        shell: bash
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.sha }}
-          release_name: Release ${{ github.sha }}
+          tag_name: ${{ env.TAG_NAME }}
+          release_name: ${{ env.RELEASE_NAME }}
           draft: false
           prerelease: false
 
