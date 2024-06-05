@@ -1,0 +1,79 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - "**"  # Change to your main branch name
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        override: true
+
+    - name: Add wasm32-wasi target
+      run: rustup target add wasm32-wasi
+
+    - name: Cache cargo registry
+      uses: actions/cache@v2
+      with:
+        path: |
+          C:\Users\runneradmin\.cargo\bin
+          C:\Users\runneradmin\.cargo\registry
+          C:\Users\runneradmin\.cargo\git
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-
+
+    - name: Build the project
+      run: cargo build --release
+
+    - name: Archive the build
+      run: |
+        mkdir artifacts
+        cp target\release\Zed.exe artifacts\
+      shell: bash
+
+    - name: Upload Release Asset
+      id: upload-release-asset
+      uses: actions/upload-artifact@v3
+      with:
+        name: Zed
+        path: artifacts\Zed.exe
+
+  release:
+    needs: build
+    runs-on: windows-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.sha }}
+        release_name: Release ${{ github.sha }}
+        draft: false
+        prerelease: false
+
+    - name: Upload to Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: artifacts\Zed.exe
+        asset_name: Zed.exe
+        asset_content_type: application/octet-stream
