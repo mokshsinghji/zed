@@ -1169,9 +1169,10 @@ async fn get_copilot_lsp(fs: Arc<dyn Fs>, node_runtime: NodeRuntime) -> anyhow::
     const SERVER_PATH: &str =
         "node_modules/@github/copilot-language-server/dist/language-server.js";
 
-    let latest_version = node_runtime
-        .npm_package_latest_version(PACKAGE_NAME)
-        .await?;
+    // let latest_version = node_runtime
+    //    .npm_package_latest_version(PACKAGE_NAME)
+    //    .await?;
+    let latest_version = "1.354.0";
     let server_path = paths::copilot_dir().join(SERVER_PATH);
 
     fs.create_dir(paths::copilot_dir()).await?;
